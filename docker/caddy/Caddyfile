@@ -1,0 +1,31 @@
+{
+    auto_https off
+}
+
+:80 {
+    root * /var/www/html/public
+    encode zstd gzip
+
+    # Handle Laravel routes
+    try_files {path} {path}/ /index.php?{query}
+
+    # PHP with FrankenPHP
+    php_server
+
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+    }
+
+    # Logging
+    log {
+        output stdout
+        format console
+    }
+
+    # File serving
+    file_server
+}
+

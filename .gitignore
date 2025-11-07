@@ -1,0 +1,10 @@
+# Laravel application code (entire directory)
+codesrc/
+
+# Docker
+.dockerignore
+
+# IDE
+/.idea
+/.vscode
+

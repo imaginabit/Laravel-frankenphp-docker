@@ -1,0 +1,73 @@
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./codesrc:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+    environment:
+      SERVER_NAME: :80
+    networks:
+      - laravel
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: mariadb:latest
+    container_name: laravel_db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_DATABASE: laravel
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_PASSWORD: root
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mariadb
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - laravel
+
+  redis:
+    image: redis:alpine
+    container_name: laravel_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: laravel_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - laravel
+    depends_on:
+      - db
+
+networks:
+  laravel:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
+
